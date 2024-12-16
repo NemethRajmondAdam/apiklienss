@@ -25,7 +25,7 @@ class Request{
             switch ($page) {
                 case 'counties':
                     $counties = [];
-                    PageCounties::table(self::getCounties(),$counties,$abc);
+                    PageCounties::table(self::getCounties(),$counties,$abc,0);
                     break;
                 case 'cities':
                       break;
@@ -43,10 +43,10 @@ class Request{
                 break;
             case isset($request['btn-counties']) :
                 $counties = [];
-                PageCounties::table(self::getCounties(),$counties,$abc);
+                PageCounties::table(self::getCounties(),$counties,$abc,0);
                 break;
             case isset($request['btn-cities']):
-                PageCities::table(self::getCities(),self::getCounties(),$abc);
+                PageCities::table(self::getCities(),self::getCounties(),$abc,0);
                 break;
             case isset($request['btn-del-county']) :
                 $requestData = $_POST["btn-del-county"];
@@ -55,7 +55,7 @@ class Request{
                     $response = $client->delete("counties",$requestData);
                 } 
                 $counties = [];
-                PageCounties::table(self::getCounties(),$counties,$abc);
+                PageCounties::table(self::getCounties(),$counties,$abc,0);
                 break; 
             
             case isset($request['btn-search']):
@@ -66,13 +66,13 @@ class Request{
                 if (isset($response['data'])) {
                     $entities = $response['data'];
                 }
-                PageCounties::table($entities,$counties,$abc);
+                PageCounties::table($entities,$counties,$abc,0);
                 break;
             case isset($request['btn-save-county']):               
                 $data['name'] = $request['name'];
                 $client->post('counties', $data);
                 $counties = [];
-                PageCounties::table(self::getCounties(),$counties,$abc);
+                PageCounties::table(self::getCounties(),$counties,$abc,0);
                 break;
             case isset($request['btn-edit']):
                 $id = $request['edit_county_id'];
@@ -94,15 +94,15 @@ class Request{
             case isset($request['btn-del-city']) :
                 $requestData = $_POST["btn-del-city"];
                 $id_county = $_POST['county_id'];
-                
+            
                 if (isset($requestData)) {           
                     $response = $client->delete("cities",$requestData);
                 } 
-                PageCities::table(self::getCitiesByCounty($id_county),self::getCounties(),self::getCitiesABC($id_county));
+                PageCities::table(self::getCitiesByCounty($id_county),self::getCounties(),self::getCitiesABC($id_county),0);
                 break; 
             case isset($request['btn-ok']):
                 $id_county = $_POST['county_id'];
-                PageCities::table(self::getCitiesByCounty($id_county),self::getCounties(),self::getCitiesABC($id_county));
+                PageCities::table(self::getCitiesByCounty($id_county),self::getCounties(),self::getCitiesABC($id_county),$id_county);
                 break; 
             case isset($request['btn-edit-city']):
                 $id = $request['edit_city_id'];
@@ -124,6 +124,11 @@ class Request{
                     $response = $client->put("cities/{$id}", $data);
                     echo 'A módosítás sikeres!';
                 }
+                break;
+            case isset($request['ch-buttons']):
+                $id = $request['ch-input'];
+                $ch = $request['ch-buttons'];
+                PageCities::table(self::getCitiesByCh($id,$ch),self::getCounties(),self::getCitiesABC($id),$id);
                 break;
         }
     }
@@ -181,5 +186,13 @@ class Request{
             $client = new Client();
             $response = $client->delete("counties",$requestData);
         } 
+    }
+
+    private static function getCitiesByCh($id,$ch): ?array
+    {
+        $client = new Client();
+        $response = $client->get("counties/{$id}/cities/{$ch}/ch");
+
+        return $response['data'] ?? null;
     }
 }

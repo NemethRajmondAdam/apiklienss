@@ -7,12 +7,12 @@ namespace App\Html;
 class PageCities extends AbstractPage
 {
 
-    static function table(array $entities, array $counties,array $abc){
+    static function table(array $entities, array $counties,array $abc, int $id_county){
         echo '<h1>Városok</h1>';
         self::dropdown($counties);
         echo '<table id="cities-table">';
         self::tableHead();
-        self::showAbcButtons($abc);
+        self::showAbcButtons($abc, $id_county);
         self::tableBody($entities);
         echo '</table>';    
     }
@@ -30,16 +30,16 @@ class PageCities extends AbstractPage
         </tr>
        </thead>';
     }
-    static function showAbcButtons(array $abc)
+    static function showAbcButtons(array $abc, int $id_county)
     {
         //var_dump($abc);
         //die;
         echo "<div style='display: flex'>";
         foreach ($abc as $ch) {
             echo "
-            <form method='post' action='makers.php'>
-                <input type='hidden' name='ch' value='$ch'>
-                <button type='submit'>$ch</button>&nbsp;
+            <form method='post' action=''>
+                <input type='hidden' name='ch-input' value=$id_county>
+                <button type='submit' name='ch-buttons' value='$ch'>$ch</button>&nbsp;
             </form>
             ";
         }
